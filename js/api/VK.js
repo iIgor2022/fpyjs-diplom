@@ -7,13 +7,21 @@
 class VK {
 
   static ACCESS_TOKEN = '958eb5d439726565e9333aa30e50e0f937ee432e927f0dbd541c541887d919a7c56f95c04217915c32008';
+  /**
+   * Убрать этот токен перед сдачей!
+   */
+  static ACCESS_TOKEN2 = 'a5acbe1ba5acbe1ba5acbe1bd5a5d06970aa5aca5acbe1bc73aba5b182adb0d9bbd9f27'
   static lastCallback;
 
   /**
    * Получает изображения
    * */
   static get(id = '', callback){
-
+    this.lastCallback = callback;
+    const script = document.createElement('script');
+    script.classList.add('vk-get-photos');
+    script.src = `https://api.vk.com/method/photos.get?owner_id=${id}&album_id=profile&photo_sizes=1&access_token=${this.ACCESS_TOKEN2}&v=5.81&callback=VK.processData`;
+    document.querySelector('head').appendChild(script);
   }
 
   /**
@@ -21,6 +29,27 @@ class VK {
    * Является обработчиком ответа от сервера.
    */
   static processData(result){
-
+    const response = result;
+    if (response.response) {
+      const images = response.response.items;
+      const resultList = [];
+      for (const item of images) {
+        const biggestImage = {size: 0, url: '',};
+        for (let size of item.sizes) {
+          if (size.height * size.width > biggestImage.size) {
+            biggestImage.size =size.height * size.width;
+            biggestImage.url = size.url;
+          }
+        }
+        resultList.push(biggestImage.url);
+      }
+      this.lastCallback(resultList);
+    }
+    if (response.error) {
+      alert(response.error.error_msg);
+    }
+    document.querySelector('.vk-get-photos').remove();
+    
+    this.lastCallback = () => {};
   }
 }
