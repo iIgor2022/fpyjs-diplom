@@ -20,15 +20,34 @@ class Yandex {
     return localStorage.getItem('YDToken');
   }
 
+  static getURL(mainURL, path = '', url = '') {
+    let result = new URL(`${this.HOST}${mainURL}`);
+    if (path !== '') {
+      result.searchParams.set('path', path);
+    }
+    if (url !== '') {
+      result.searchParams.set('url', url);
+    }
+    return result;
+  }
+
+  static getHeaders() {
+    return {
+      'Authorization': `OAuth ${this.getToken()}`,
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+    };
+  }
+
   /**
    * Метод загрузки файла в облако
    */
   static uploadFile(path, url, callback){
     createRequest({
       method: 'POST',
-      headers: this.getToken(),
+      headers: this.getHeaders(),
       callback,
-      url: `${this.HOST}/resources/upload?url=${url}&path=disk:/${path}`,
+      url: this.getURL('/resources/upload', path, url),
     });
   }
 
@@ -38,9 +57,9 @@ class Yandex {
   static removeFile(path, callback){
     createRequest({
       method: 'DELETE',
-      headers: this.getToken(),
+      headers: this.getHeaders(),
       callback,
-      url: `${this.HOST}/resources?path=${path}`,
+      url: this.getURL('/resources', path),
     });
   }
 
@@ -50,9 +69,9 @@ class Yandex {
   static getUploadedFiles(callback){
     createRequest({
       method: 'GET',
-      headers: this.getToken(),
+      headers: this.getHeaders(),
       callback,
-      url: `${this.HOST}/resources/files?media_type=image&fields=items.size,items.created,items.file,items.name,items.path,items.preview`,
+      url: this.getURL('/resources/files'),
     });
   }
 

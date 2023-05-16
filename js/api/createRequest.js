@@ -12,8 +12,9 @@ const createRequest = (options = {}) => {
 
   try {
     xhr.open(options.method, options.url);
-    xhr.setRequestHeader('Authorization', `OAuth ${options.headers}`);
-    xhr.setRequestHeader('Content-Type', 'application/json');
+    for (let key in options.headers) {
+      xhr.setRequestHeader(key, options.headers[key]);
+    };
     xhr.send();
   } catch(error) {
     console.log(error);
